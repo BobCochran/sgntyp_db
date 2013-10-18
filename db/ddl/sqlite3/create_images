@@ -1,0 +1,7 @@
+CREATE TABLE images (
+    im_seq            bigint PRIMARY KEY,      -- image sequence
+    gloss         text,                        -- image concepts group                        
+    image         blob,                        -- image itself
+    im_ty         char(1),                     -- image type
+    im_credit     text                         -- image credit?           
+);
