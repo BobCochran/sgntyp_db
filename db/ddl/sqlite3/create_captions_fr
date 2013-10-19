@@ -1,0 +1,4 @@
+CREATE TABLE captions_fr (
+    fr_glosskey   text,                        -- concept group                        
+    fr_txt        varchar(50)                  -- gloss associated with image in fr locale
+);

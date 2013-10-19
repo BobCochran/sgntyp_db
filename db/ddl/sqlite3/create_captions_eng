@@ -1,0 +1,5 @@
+CREATE TABLE captions_eng (
+    cgloss        text,                        -- image concepts group                        
+    cpage         bigint,                      -- page number of target web page
+    en_ctext      varchar(50)                  -- gloss associated with image, in en_US locale
+);

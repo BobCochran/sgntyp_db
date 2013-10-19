@@ -1,0 +1,6 @@
+CREATE TABLE pages (
+    pgloss        text,                        -- image concepts group                        
+    page          bigint,                      -- page number
+    npic          int,                         -- number of pictures to be displayed
+    cline         text                         -- vertical center line
+);
