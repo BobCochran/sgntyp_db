@@ -9,12 +9,14 @@ database tables.
 
 The folder structure is as follows:
 
+```
 db----------------------
     |                  |
     ddl---             scripts---
          |                      |
          sqlite3                node
 
+```
 
 Two trees exist:
 
