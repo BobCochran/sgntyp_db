@@ -29,6 +29,8 @@ the database tables with data.
 # Software Requirements
 
 Minimum SQLITE version: 3.8.1; download from http://www.sqlite.org/
+    Considerable work is being done with Sqlite version 3.8.2 dated 
+    December 6, 2013.
 
 Minimum Node.js version: 0.10.22, download from http://www.nodejs.org/
 
