@@ -1,0 +1,4 @@
+CREATE TABLE congrp (
+    cid   	  bigint PRIMARY KEY,          -- concept group identifier                        
+    cgrp          text                         -- Full concept group name
+);

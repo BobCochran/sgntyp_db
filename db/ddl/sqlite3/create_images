@@ -3,5 +3,9 @@ CREATE TABLE images (
     gloss         text,                        -- image concepts group                        
     image         blob,                        -- image itself
     im_ty         char(1),                     -- image type
-    im_credit     text                         -- image credit?           
+    im_credit     text,                        -- image credit
+    im_pg         bigint,                      -- target web page sequence number
+    im_pg_sq      bigint,                      -- position of this image within the target web page
+    im_fn         text,                        -- textual file name of this image
+    im_cp         bigint                       -- identifier of the concept group associated with this image           
 );
