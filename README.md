@@ -37,7 +37,7 @@ Minimum SQLITE version: 3.8.1; download from http://www.sqlite.org/
 
 Minimum Node.js version: 0.10.22, download from http://www.nodejs.org/
 
-Minimum python version: 3.1.
+Minimum Python version: 3.3.
 
 Required Node.js modules: 'sqlite3'. Install with `npm install sqlite3'
 
