@@ -12,19 +12,22 @@ The folder structure is as follows:
 ```
 db----------------------
     |                  |
-    ddl---             scripts---
-         |                      |
-         sqlite3                node
+    ddl---             scripts----------
+         |                      |      |
+         sqlite3                node   python3
 
 ```
 
-Two trees exist:
+Three trees exist:
 
 db/ddl/sqlite -- under which you will find the actual data definition language files
 for each table in imst.db.
 
 db/scripts/node -- under which you will find various node.js scripts for populating 
 the database tables with data.
+
+db/scripts/python3 -- under which you will find various python (version 3.x) scripts for 
+populating the database tables with data.
 
 # Software Requirements
 
@@ -34,11 +37,13 @@ Minimum SQLITE version: 3.8.1; download from http://www.sqlite.org/
 
 Minimum Node.js version: 0.10.22, download from http://www.nodejs.org/
 
+Minimum python version: 3.1.
+
 Required Node.js modules: 'sqlite3'. Install with `npm install sqlite3'
 
 Scripts are tested on at least a CentOS 6.5 server.
 
-Marissa Collins contributed he Python scripts to this Project.
+We gratefully acknowledge Python scripts contributed by Marissa Collins to this Project.
 
 Date of last update of this README.md file: 2014-01-11
 
