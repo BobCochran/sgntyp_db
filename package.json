@@ -1,0 +1,27 @@
+{
+  "name": "Signtyp-Database",
+  "description": "Creates the database tables for the Signtyp Imaging Project",
+  "contributors": [
+    {
+      "name": "Bob Cochran",
+      "email": "r2cochran2gmail.com"
+    },
+    {
+      "name": "Marissa Collins",
+      "email": "marissakc@gmail.com"
+    }
+  ],
+  "version": "0.4.0",
+  "repository": {
+        "type": "git",
+        "url": "https://github.com/BobCochran/sgntyp_db.git"
+    },
+    "bugs": {
+        "url": "https://github.com/BobCochran/sgntyp_db/issues"
+    },
+    "dependencies": {
+    "sqlite3": ">=2.1.19",
+    "async":   "~0.2.9"
+  },
+  "license": "MIT"
+}

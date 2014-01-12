@@ -38,7 +38,9 @@ Required Node.js modules: 'sqlite3'. Install with `npm install sqlite3'
 
 Scripts are tested on at least a CentOS 6.5 server.
 
-Date of last update of this README.md file: 2013-12-05
+Marissa Collins contributed he Python scripts to this Project.
+
+Date of last update of this README.md file: 2014-01-11
 
 Contact: for support, please contact Bob Cochran, R2COCHRAN2@GMAIL.COM
 
