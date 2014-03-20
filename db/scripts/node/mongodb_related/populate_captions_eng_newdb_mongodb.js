@@ -93,11 +93,17 @@ MongoClient.connect(format("mongodb://%s:%s/sgtypdb2?journal=true", host, port),
     if (remaining.length > 0) {
       func(remaining);
     }
-    console.log('\nTotal number of lines including header row: ' + totalLines + '\n')
-      for(var pj = 0; pj < 1300000; pj++) {
-          var pk = 0
-          pk++
-      }
+    // Try a 10 second timer before writing to the console
+    setTimeout(function () {
+        console.log('\nTotal number of lines including header row: ' + totalLines + '\n')
+        for(var pj = 0; pj < 1300000; pj++) {
+            var pk = 0
+            pk++
+        }
+    }, 10000)
+
+//TODO If you don't have a header row it just closes the database without console messages
+      
       if (cdcnt === totalLines) {
           db.close()
       } else {
