@@ -102,15 +102,15 @@ MongoClient.connect(format("mongodb://%s:%s/sgtypdb2?journal=true", host, port),
         }
     }, 10000)
 
-//TODO If you don't have a header row it just closes the database without console messages
-      
       if (cdcnt === totalLines) {
+          console.log('Total documents committed to database collection is ' + cdcnt)
           db.close()
       } else {
-          console.log('Total documents committed to database is ' + cdcnt)
+
           console.log('Setting a 180-second 3 minute timer up to close connection ')
           setTimeout(function () {
            //   console.log('Count of documents ' + collection.count())
+              console.log('Total documents committed to database collection is ' + cdcnt)
               db.close()
           }, 180000)
       }
