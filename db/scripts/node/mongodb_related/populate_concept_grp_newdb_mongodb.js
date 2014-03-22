@@ -124,7 +124,7 @@ readLines(input, func);
          *************************************************************************/
           console.log('cgrp_num ' + cgrp_num + ' cgrp_txt2 ' + cgrp_txt2 + '\n')    // concept group
           var index1 = remaining.indexOf('\n');                                       //let us update index1
-          cdcnt++                                                                   //pretend this is committed
+
 
 
       collection.insert([{ 'cgrp_num_int' : cgrp_num_int, 'cgrp_text': cgrp_txt2 }], function(err, result) {
@@ -133,7 +133,7 @@ readLines(input, func);
           } else if (err) {
           throw err
           }
-          cdcnt++
+          cdcnt++                    // count the commit
       });
 
   }
