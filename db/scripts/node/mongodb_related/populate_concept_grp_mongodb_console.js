@@ -27,8 +27,9 @@
  * CTRL-C the database inserts will most likely not complete.            *
  ************************************************************************/
 var fs = require('fs');
-var totalLines = 0
-var cdcnt = 0
+var totalLines = 0            //Number of lines found in input file
+var cdcnt = 0                 //Number of rows committed to collection
+var errorcnt = 0;             //Error lines found with an NaN condition
 
 //var input = fs.createReadStream('./FileNamesandCaptionKeys_test_sample.txt');
 //var input = fs.createReadStream('/Volumes/pictures/Signtyp/PromptinfoFiles/FileNamesandCaptionKeys.txt')
@@ -90,6 +91,7 @@ readLines(input, func);
           if (isNaN(cgrp_num_int)) {
               console.log('Not a number condition found at line number ' + totalLines)
               func(line)
+              errorcnt++
           }
 
        /****************************************************************************
@@ -105,6 +107,7 @@ readLines(input, func);
          *************************************************************************/
           console.log('cgrp_num ' + cgrp_num + ' cgrp_txt2 ' + cgrp_txt2 + '\n')    // concept group
           var index1 = remaining.indexOf('\n');                                       //let us update index1
+          cdcnt++                                                                   //pretend this is committed
 
 
 /*      collection.insert([{ 'cgrp_num_int' : cgrp_num_int, 'cgrp_text': cgrp_txt2 }], function(err, result) {
@@ -124,7 +127,14 @@ readLines(input, func);
     if (remaining.length > 0) {
       func(remaining);
     }
-    console.log('\nTotal number of lines: ' + totalLines + '\n')
+      console.log('Setting a 60-second 1 minute timer up to wait for event loop to finish ')
+      setTimeout(function () {
+          console.log('\nTotal number of lines in input file: ' + totalLines + '\n')
+          console.log('Total documents committed to database collection is ' + cdcnt + '\n')
+          console.log('\nTotal number of errors detected: ' + errorcnt + '\n')
+
+      }, 60000)
+
   })
     }
 
