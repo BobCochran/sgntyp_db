@@ -127,11 +127,12 @@ readLines(input, func);
     if (remaining.length > 0) {
       func(remaining);
     }
-      console.log('Setting a 60-second 1 minute timer up to wait for event loop to finish ')
+      console.log('Setting a 60-second 1 minute timer to wait for event loop to finish ')
       setTimeout(function () {
-          console.log('\nTotal number of lines in input file: ' + totalLines + '\n')
+          console.log('\nTotal number of lines in input file, including the header row: ' + totalLines + '\n')
           console.log('Total documents committed to database collection is ' + cdcnt + '\n')
-          console.log('\nTotal number of errors detected: ' + errorcnt + '\n')
+          console.log('(Header row purposely omitted from commits...)\n')
+          console.log('Total number of errors detected: ' + errorcnt + '\n')
 
       }, 60000)
 
