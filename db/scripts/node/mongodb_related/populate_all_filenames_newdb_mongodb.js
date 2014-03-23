@@ -43,7 +43,7 @@ MongoClient.connect(format("mongodb://%s:%s/sgtypdb2?journal=true", host, port),
 
         var collection = db.collection('fnck')
 
-        var input = fs.createReadStream('/Users/bobc/Documents/sgntyp_renamed_files_2014-03-08/converted_New_Captions_English_2014-03-08_.txt');
+        var input = fs.createReadStream('/Users/bobc/Documents/sgntyp_renamed_files_2014-03-08/converted_New_Names_2014-03-08_FileNamesandCaptionKeys.txt');
 
         readLines(input, func);
 
