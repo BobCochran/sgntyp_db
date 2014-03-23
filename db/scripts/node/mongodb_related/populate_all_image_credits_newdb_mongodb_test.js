@@ -80,7 +80,7 @@ var startLn = 0         // the starting line for this processing "pass"
 var endLn = 0           // the ending line for this processing "pass"
 var actLines = 0        // the actual number of text lines that readLines has found
 var webRows = 0         // count of web page row numbers, starting from 1
-var webPageNumb = 4     // the number of the web page for this processing "pass"
+var webPageNumb = 5     // the number of the web page for this processing "pass"
 
 /* Were any arguments passed in? Exit if none found */
 
@@ -261,7 +261,7 @@ function get_photo_info(fname) {
 function build_summary_web_page(wr) {
 
     debugger
-    var wr1 = wr
+    var wr1 = parseInt(wr, 10)
     var stream2 = fs.createWriteStream(__dirname + '/photographer_table' + webPageNumb + '.html')
 
     stream2.write("<!DOCTYPE html><html lang=\"EN\"><head><meta charset=\"utf-8\" />" +
@@ -271,8 +271,8 @@ function build_summary_web_page(wr) {
         "<th scope=\"col\">Photo Located At</th></tr></thead><tbody>")
     for (var k = 0; k < im_array.length; k++) {
 
-        stream2.write("<tr><td>" + k + "</td><td>" + im_array[k] + "</td><td>" + pho_array[k] + "</td><td>" + "<a href=\"" + url_array[k] + "\"" + " target=\"_blank\">" + url_array[k] + "</a></td></tr>")
-        wr1 += 1
+        stream2.write("<tr><td>" + wr1 + "</td><td>" + im_array[k] + "</td><td>" + pho_array[k] + "</td><td>" + "<a href=\"" + url_array[k] + "\"" + " target=\"_blank\">" + url_array[k] + "</a></td></tr>")
+        wr1++
     }
     stream2.end("</tbody></table><p>Programming proudly done by Bob Cochran r2cochran2 at gmail dot com</p></body></html>")
     stream2.on("finish", function() {
