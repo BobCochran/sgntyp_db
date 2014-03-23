@@ -79,8 +79,8 @@ var strean              // for use in parsing for photographer name
 var startLn = 0         // the starting line for this processing "pass"
 var endLn = 0           // the ending line for this processing "pass"
 var actLines = 0        // the actual number of text lines that readLines has found
-var webRows = 0        // count of web page row numbers, starting from 1
-var webPageNumb = 2     // the number of the web page for this processing "pass"
+var webRows = 0         // count of web page row numbers, starting from 1
+var webPageNumb = 3     // the number of the web page for this processing "pass"
 
 /* Were any arguments passed in? Exit if none found */
 
@@ -200,7 +200,7 @@ function get_credits() {
  */
 function get_photo_info(fname) {
 //    stream = fs.createReadStream('./' + fname)
-    stream = fs.createReadStream('/Volumes/pictures/Signtyp/SigntypFromLightroom/' + fname)
+    stream = fs.createReadStream('/Volumes/pictures/Signtyp/promptsnormalizedOnefolder/' + fname)
     stream.on("error", function(err) {
      //   pho_array.push("not found")
      //   url_array.push("do not click not found")
