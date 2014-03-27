@@ -233,7 +233,8 @@ function get_photo_info(fname) {
         if (phline > -1) {
             name_end = chunk.indexOf('\n',phline)
             photog = chunk.slice(phline+15,name_end)
-            console.log('Photographer is ' + photog + '\, and File name is ' + stream.filename)
+            //console.log('Photographer is ' + photog + '\, and File name is ' + stream.filename)
+            console.log(photog)
             pho_array.push(photog)
 
         } else {
