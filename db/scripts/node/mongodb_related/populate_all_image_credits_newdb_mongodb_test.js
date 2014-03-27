@@ -80,7 +80,7 @@ var startLn = 0         // the starting line for this processing "pass"
 var endLn = 0           // the ending line for this processing "pass"
 var actLines = 0        // the actual number of text lines that readLines has found
 var webRows = 0         // count of web page row numbers, starting from 1
-var webPageNumb = 5     // the number of the web page for this processing "pass"
+var webPageNumb = 6     // the number of the web page for this processing "pass"
 
 /* Were any arguments passed in? Exit if none found */
 
@@ -227,12 +227,13 @@ function get_photo_info(fname) {
         var name_end
         var the_url
         var url_end
+
         chunk += data1
         phline = chunk.indexOf('Photographer : ')
         if (phline > -1) {
             name_end = chunk.indexOf('\n',phline)
             photog = chunk.slice(phline+15,name_end)
-            console.log(photog)
+            console.log('Photographer is ' + photog + ', and File name is ' + stream.filename)
             pho_array.push(photog)
 
         } else {
@@ -311,4 +312,3 @@ function bottomindexprt(data3) {
    console.log('The content of index index1 at the bottom of the while loop is ' + data3)
 
     }
-
