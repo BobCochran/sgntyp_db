@@ -80,7 +80,7 @@ var startLn = 0         // the starting line for this processing "pass"
 var endLn = 0           // the ending line for this processing "pass"
 var actLines = 0        // the actual number of text lines that readLines has found
 var webRows = 0         // count of web page row numbers, starting from 1
-var webPageNumb = 6     // the number of the web page for this processing "pass"
+var webPageNumb = 7     // the number of the web page for this processing "pass"
 
 /* Were any arguments passed in? Exit if none found */
 
@@ -189,7 +189,7 @@ function get_credits() {
             get_photo_info(fn_array[pj])
             process.stdout.write('done!\n')
         }
-    }, 30000)
+    }, 35000)
 
 
 }
@@ -233,7 +233,7 @@ function get_photo_info(fname) {
         if (phline > -1) {
             name_end = chunk.indexOf('\n',phline)
             photog = chunk.slice(phline+15,name_end)
-            console.log('Photographer is ' + photog + ', and File name is ' + stream.filename)
+            console.log('Photographer is ' + photog + '\, and File name is ' + stream.filename)
             pho_array.push(photog)
 
         } else {
