@@ -18,7 +18,7 @@
  * The script processes in small passes to account for system overhead in*
  * using up too many file descriptors.                                   *
  * ----------------------------------------------------------------------*
- * 2014-03-28                                                            *
+ * 2014-03-29                                                            *
  * CUSTOMER-SUPPLIED FILE MAY NEED REFORMATTING PRIOR TO USE             *
  * ----------------------------------------------------------------------*
  * Read the converted_New_Names_2014-03-08_FileNamesandCaptionKeys.txt   *
@@ -106,6 +106,12 @@ var actLines = 0        // the actual number of text lines that readLines has fo
 var webRows = 0         // count of web page row numbers, starting from 1
 var array_lines = 0     // the number of array iterations we need
 
+var MongoClient = require('mongodb').MongoClient
+    , format = require('util').format;
+
+var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
+var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : 27017;
+
 /* Were any arguments passed in? Exit if none found */
 
 if (process.argv.length < 3) {
@@ -155,6 +161,44 @@ get_credits()
 setTimeout(function () {
     do_array_print()
 },46000)
+
+/* At this point, we now have an array all ready to update the collection 'fnck' in the
+ * test or production database. We will use db.fnck.update() to add a new key to the fnck
+ * collection named 'pho'. For each document, this key will have the value of the individual
+ * photographer's name.
+ *
+ */
+
+console.log("\nUpdating database collection.");
+console.log("\nConnecting to database server on " + host + ":" + port +"\n");
+
+/* Connect to the 'test' database to test out the logic. Turn on journaling. */
+
+MongoClient.connect(format("mongodb://%s:%s/test?journal=true", host, port), function(err, db) {
+    if (err) {
+        throw err
+        return
+    }
+
+    var collection = db.collection('fnck')
+
+    for (var i = 0; i < im_array.length; i++) {
+        /* collection.update essentially adds a new key called 'pho' */
+        collection.update(
+            { fn : im_array[i][0] },
+            { $set: {
+              pho : im_array[i][2]}
+            }, function (err, result) {
+                if (err) return err
+            })
+
+        /* wait 20 seconds and hope write operations are done */
+        setTimeout(function () {
+            db.close()
+        },20000)
+    }
+
+})
 
 function readLines(input, func) {
       var remaining = '';
@@ -295,8 +339,8 @@ function func(data) {
  
 }
 function do_array_print() {
-    console.log('Image name\tFilename\tPhotographer name\n')
+    console.log('Image name\tFilename\t\tPhotographer name\n')
     for (var i = 0; i < im_array.length; i++) {
-        console.log(im_array[i][0] + '\t' + im_array[i][1] + '\t' + im_array[i][2])
+        console.log(im_array[i][0] + '\t' + im_array[i][1] + '\t\t' + im_array[i][2])
     }
 }
