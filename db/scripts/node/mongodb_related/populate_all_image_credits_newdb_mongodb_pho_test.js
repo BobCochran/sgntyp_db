@@ -97,16 +97,14 @@
  ************************************************************************/
 var fs = require('fs');
 var totalLines = 0
-var im_array = []       // an array of image names without the dot extension (no *.txt or *.jpg)
-var fn_array = []       // an array of file names
-var pho_array = []      // an array of all the photographer names
-var url_array = []      // an array of all the photo credit urls
-var strean              // for use in parsing for photographer name
+var im_array = []       // multidimensional array of image names, file names, photographer names
+var j1 = 0              // first dimenion of im_array
+var j2 = 0              // second dimension of im_array
+var stream              // for use in parsing for photographer name
 var startLn = 0         // the starting line for this processing "pass"
 var endLn = 0           // the ending line for this processing "pass"
 var actLines = 0        // the actual number of text lines that readLines has found
 var webRows = 0         // count of web page row numbers, starting from 1
-var webPageNumb = 7     // the number of the web page for this processing "pass"
 
 /* Were any arguments passed in? Exit if none found */
 
@@ -142,7 +140,7 @@ get_credits()
  * the summary web page. We want to pass it the starting line number value.
  */
 setTimeout(function () {
-//    build_summary_web_page(startLn)
+    do_array_print()
 },46000)
 
 function readLines(input, func) {
@@ -182,9 +180,12 @@ function readLines(input, func) {
           } else {
               var fn1 = line.slice(0, tbbl)        // save the file name string up to the tab character
           }
-          im_array.push(fn1)                      // save the filename string without an extension
+          im_array[j1][j2].push(fn1)              // save the filename string without an extension
           fn1 = fn1 + '.txt'                      // append the .txt extension
-          fn_array.push(fn1)                      // push this onto the array
+          j2++                                    // bump to next element in j1
+          im_array[j1][j2].push(fn1)              // push this onto the array
+          j2 = 0                                  // reset j2
+          j1++                                    // set up the next array
 
   }
 })
@@ -199,20 +200,25 @@ function readLines(input, func) {
     }
 /*
  * At this point, we have extracted all the filenames from the source TSV document and these
- * are waiting for us in the array fn_array. For each file name in the array, we want to call
- * a function that will create a readstream of that file's contents, and parse out the
- * photographer's name and photo URL. These fields would be put into separate arrays. After
- * all the file names are processed, we can update the 'fnck' collection documents with the
- * corresponding information.
+ * are waiting for us in the array im_array. The array now looks like this:
+ *
+ * [["_8758450914_o", "_8758450914_o.txt", ...],["_9758450914_o", "_9758450914_o.txt",...]...]
+ *
+ * For each file name in the array[j1][j2], we want to call a function that will
+ * create a readstream of that file's contents, and parse out the
+ * photographer's name. The photographer name would be put into im_array[j1][2].
+ *
+ * After all the file names are processed, we can update the 'fnck' collection documents with
+ * corresponding photographer information.
  *
  */
 function get_credits() {
 
     setTimeout(function () {
         process.stdout.write('\nProcessing files...\n')
-        for(var pj = 0; pj < fn_array.length; pj++) {
-            process.stdout.write(fn_array[pj] + '... ')
-            get_photo_info(fn_array[pj])
+        for(var pj = 0; pj < im_array.length; pj++) {
+            process.stdout.write(im_array[pj][0] + '... ')
+            get_photo_info(im_array[pj][0],pj)
             process.stdout.write('done!\n')
         }
     }, 35000)
@@ -222,14 +228,13 @@ function get_credits() {
 /*
  This function accepts an input file name in the format filename.txt from function
  get_credits() and attempts to create a readstream of the file. Then it attempts to
- parse out the photographer's name and the photo url.
+ parse out the photographer's name and save that to im_array[pj][2].
  */
-function get_photo_info(fname) {
-//    stream = fs.createReadStream('./' + fname)
+function get_photo_info(fname,idx) {
+
     stream = fs.createReadStream('/Volumes/pictures/Signtyp/promptsnormalizedOnefolder/' + fname)
     stream.on("error", function(err) {
-     //   pho_array.push("not found")
-     //   url_array.push("do not click not found")
+
         return console.error("open file error " + err.message)
 
     })
@@ -259,22 +264,12 @@ function get_photo_info(fname) {
         if (phline > -1) {
             name_end = chunk.indexOf('\n',phline)
             photog = chunk.slice(phline+15,name_end)
-            //console.log('Photographer is ' + photog + '\, and File name is ' + stream.filename)
-            console.log(photog)
-            pho_array.push(photog)
+            im_array[idx][2].push(photog)
 
         } else {
             process.stdout.write('Photographer not found')
         }
-        phline = chunk.indexOf('Photo URL    : ')
-        if (phline > -1) {
-            url_end = chunk.indexOf('\n',phline)
-            the_url = chunk.slice(phline+15,url_end)
-            console.log(the_url)
-            url_array.push(the_url)
-        } else {
-            console.log('Photo URL not found')
-        }
+
 
     })
 }
@@ -283,31 +278,9 @@ function func(data) {
   console.log('Line: ' + totalLines + ' ' + data);
  
 }
-
-/**************************************************************************
- * This function prints the string data called "remaining"                *
-**************************************************************************/
-function whatsleft(data) {
-  console.log('The data left in string remaining ' + data)
-
-}
-
-/*************************************************************************
- * This function prints the value of index1 at the top of the while      *
- * loop                                                                  *
- ************************************************************************/
-
-function topindexprt(data2) {
-   console.log('The content of index index1 at the top of the while loop is ' + data2)
-
-}
-
-/*************************************************************************
- * This function prints the value of index1 at the bottom of the while   *
- * loop when it is modified                                              *
- ************************************************************************/
-
-function bottomindexprt(data3) {
-   console.log('The content of index index1 at the bottom of the while loop is ' + data3)
-
+function do_array_print() {
+    console.log('Image name\tFilename\tPhotographer name\n')
+    for (var i = 0; i < im_array.length; i++) {
+        console.log(im_array[i][0] + '\t' + im_array[i][1] + '\t' + im_array[i][2])
     }
+}
