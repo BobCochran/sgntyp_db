@@ -97,7 +97,6 @@
  ************************************************************************/
 var fs = require('fs');
 var totalLines = 0
-var im_array = []       // multidimensional array of image names, file names, photographer names
 var j1 = 0              // first dimenion of im_array
 var j2 = 0              // second dimension of im_array
 var stream              // for use in parsing for photographer name
@@ -105,6 +104,7 @@ var startLn = 0         // the starting line for this processing "pass"
 var endLn = 0           // the ending line for this processing "pass"
 var actLines = 0        // the actual number of text lines that readLines has found
 var webRows = 0         // count of web page row numbers, starting from 1
+var array_lines = 0     // the number of array iterations we need
 
 /* Were any arguments passed in? Exit if none found */
 
@@ -128,8 +128,18 @@ process.argv.forEach(function(val, index, array) {
     }
 });
 
+array_lines = endLn - startLn      //compute number of iterations
+
 console.log('startLn is ' + startLn)
-console.log('endLn is ' + endLn + '\n')
+console.log('endLn is ' + endLn)
+console.log('Number of iterations in the array will be ' + array_lines + '\n')
+
+/* Set up an [lines being processed] x 3 array */
+
+var im_array = new Array(array_lines)       // multidimensional array of image names, file names, photographer names
+for(i = 0; i < im_array.length; i++) {
+    arr[i] = new Array(3);
+}
 
 var input = fs.createReadStream('/Users/bobc/Documents/sgntyp_renamed_files_2014-03-08/converted_New_Names_2014-03-08_FileNamesandCaptionKeys.txt');
 
