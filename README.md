@@ -7,12 +7,16 @@ with the Signtyp Imaging Project.
 The project also contains optional scripts written in node.js which can populate the 
 database tables.
 
-# Experimental NoSQL Database Support
+# NoSQL Database Support
 
-An experiment is added, in which a database named "sgntypdb" and associated collections 
-are created in MongoDB version 2.4.9 to see if this can help speed up development 
-time. Scripts which successfully populate a MongoDB database and collection are added 
-to the scripts/node/mongodb_related directory. 
+After experimentation, MongoDB is being used to provide all database support
+for this project. A database named "sgtypdb2" exists and associated collections 
+are being progressively created and tested as time goes on. MongoDB version 2.4.9 and Node.js 
+version 0.10.26 is being used. A nonrelational database approach seems to speed
+development time for the database. Scripts which successfully populate a collection are 
+added to the db/scripts/node/mongodb_related directory. A given collection may be updated 
+by more than one script. This is especially true of the 'fnck' collection. 
+Some scripts may be broken. Others may only print data to the terminal.  
 
 The folder structure is as follows:
 
@@ -37,13 +41,29 @@ the databases of interest (SQLite3 or MongoDB) with data.
 db/scripts/python3 -- under which you will find various python (version 3.x) scripts for 
 populating the database tables with data.
 
+# MongoDB database details:
+
+The officially supported database name will be  'sgtypdb2'. Some scripts may be writing to
+the 'test' database, since the developer maintains this for testing program logic.
+
+The collections associated with the database are:
+
+congrp
+fnck
+captioneng
+
+14 additional collections are being planned.
+
+As of this writing, the database is about 60% complete. All collections contain data
+provided to the developer by the Project's Principal Investigators.
+
 # Software Requirements
 
 Minimum SQLITE version: 3.8.1; download from http://www.sqlite.org/
     Considerable work is being done with Sqlite version 3.8.2 dated 
     December 6, 2013.
 
-For experimental MongoDB support, install MongoDB from http://www.mongodb.org/. 
+For MongoDB support, install MongoDB from http://www.mongodb.org/. 
 MongoDB minimum version for this project is 2.4.9.
 
 Minimum Node.js version: 0.10.22, download from http://www.nodejs.org/
@@ -59,8 +79,9 @@ Scripts are tested on at least a CentOS 6.5 server.
 
 We gratefully acknowledge Python scripts contributed by Marissa Collins to this Project.
 
-Date of last update of this README.md file: 2014-01-28
+Date of last update of this README.md file: 2014-03-29
 
-Contact: for support, please contact Bob Cochran, R2COCHRAN2@GMAIL.COM
+Contact: for support, please contact Bob Cochran, R2COCHRAN2@GMAIL.COM. You may also
+open an issue on http://github.com/BobCochran/sgntyp_db.git
 
 
