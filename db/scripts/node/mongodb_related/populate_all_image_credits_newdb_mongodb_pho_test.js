@@ -136,9 +136,9 @@ console.log('Number of iterations in the array will be ' + array_lines + '\n')
 
 /* Set up an [lines being processed] x 3 array */
 
-var im_array = new Array(array_lines)       // multidimensional array of image names, file names, photographer names
-for(i = 0; i < im_array.length; i++) {
-    im_array[i] = new Array(3);
+var im_array = []             // multidimensional array of image names, file names, photographer names
+for(i = 0; i < array_lines; i++) {
+    im_array[i] = [];
 }
 
 var input = fs.createReadStream('/Users/bobc/Documents/sgntyp_renamed_files_2014-03-08/converted_New_Names_2014-03-08_FileNamesandCaptionKeys.txt');
