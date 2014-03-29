@@ -128,7 +128,7 @@ process.argv.forEach(function(val, index, array) {
     }
 });
 
-array_lines = endLn - startLn      //compute number of iterations
+array_lines = ((endLn - startLn) + 1)      //compute number of iterations
 
 console.log('startLn is ' + startLn)
 console.log('endLn is ' + endLn)
@@ -139,6 +139,9 @@ console.log('Number of iterations in the array will be ' + array_lines + '\n')
 var im_array = []             // multidimensional array of image names, file names, photographer names
 for(i = 0; i < array_lines; i++) {
     im_array[i] = [];
+    for (var y = 0; y < 3; y++) {
+        im_array[i][y] = ""
+    }
 }
 
 var input = fs.createReadStream('/Users/bobc/Documents/sgntyp_renamed_files_2014-03-08/converted_New_Names_2014-03-08_FileNamesandCaptionKeys.txt');
@@ -190,12 +193,15 @@ function readLines(input, func) {
           } else {
               var fn1 = line.slice(0, tbbl)        // save the file name string up to the tab character
           }
-          im_array[j1][j2].push(fn1)              // save the filename string without an extension
+          debugger
+          im_array[j1][j2] = fn1              // save the filename string without an extension
+
           fn1 = fn1 + '.txt'                      // append the .txt extension
           j2++                                    // bump to next element in j1
-          im_array[j1][j2].push(fn1)              // push this onto the array
+          im_array[j1][j2] = fn1                  // push this onto the array
           j2 = 0                                  // reset j2
           j1++                                    // set up the next array
+          debugger
 
   }
 })
@@ -266,15 +272,15 @@ function get_photo_info(fname,idx) {
         var phline
         var photog
         var name_end
-        var the_url
-        var url_end
+//        var the_url
+//        var url_end
 
         chunk += data1
         phline = chunk.indexOf('Photographer : ')
         if (phline > -1) {
             name_end = chunk.indexOf('\n',phline)
             photog = chunk.slice(phline+15,name_end)
-            im_array[idx][2].push(photog)
+            im_array[idx][2] = photog
 
         } else {
             process.stdout.write('Photographer not found')
