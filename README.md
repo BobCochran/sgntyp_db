@@ -50,9 +50,11 @@ The database itself is expected to be quite small, about 8 Gb.
 
 The collections associated with the database are:
 
- congrp
- fnck
- captioneng
+ |Collection|Content|
+ |----------|:-----:|
+ |congrp    |Concept groups|
+ |fnck      |File names and caption keys|
+ |captioneng|English caption texts|
 
 14 additional collections are being planned.
 
