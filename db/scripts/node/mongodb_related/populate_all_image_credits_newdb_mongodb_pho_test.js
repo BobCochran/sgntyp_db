@@ -160,45 +160,9 @@ get_credits()
  */
 setTimeout(function () {
     do_array_print()
+    do_db_updates()
 },46000)
 
-/* At this point, we now have an array all ready to update the collection 'fnck' in the
- * test or production database. We will use db.fnck.update() to add a new key to the fnck
- * collection named 'pho'. For each document, this key will have the value of the individual
- * photographer's name.
- *
- */
-
-console.log("\nUpdating database collection.");
-console.log("\nConnecting to database server on " + host + ":" + port +"\n");
-
-/* Connect to the 'test' database to test out the logic. Turn on journaling. */
-
-MongoClient.connect(format("mongodb://%s:%s/test?journal=true", host, port), function(err, db) {
-    if (err) {
-        throw err
-        return
-    }
-
-    var collection = db.collection('fnck')
-
-    for (var i = 0; i < im_array.length; i++) {
-        /* collection.update essentially adds a new key called 'pho' */
-        collection.update(
-            { fn : im_array[i][0] },
-            { $set: {
-              pho : im_array[i][2]}
-            }, function (err, result) {
-                if (err) return err
-            })
-
-        /* wait 20 seconds and hope write operations are done */
-        setTimeout(function () {
-            db.close()
-        },20000)
-    }
-
-})
 
 function readLines(input, func) {
       var remaining = '';
@@ -322,7 +286,9 @@ function get_photo_info(fname,idx) {
         chunk += data1
         phline = chunk.indexOf('Photographer : ')
         if (phline > -1) {
-            name_end = chunk.indexOf('\n',phline)
+//            name_end = chunk.indexOf('\n',phline)
+            // try to get rid of the carriage return stuff
+            name_end = chunk.indexOf('\r',phline)
             photog = chunk.slice(phline+15,name_end)
             im_array[idx][2] = photog
 
@@ -343,4 +309,44 @@ function do_array_print() {
     for (var i = 0; i < im_array.length; i++) {
         console.log(im_array[i][0] + '\t' + im_array[i][1] + '\t\t' + im_array[i][2])
     }
+}
+function do_db_updates() {
+    /* At this point, we now have an array all ready to update the collection 'fnck' in the
+     * test or production database. We will use db.fnck.update() to add a new key to the fnck
+     * collection named 'pho'. For each document, this key will have the value of the individual
+     * photographer's name.
+     *
+     */
+
+    console.log("\nUpdating database collection.");
+    console.log("\nConnecting to database server on " + host + ":" + port +"\n");
+
+    /* Connect to the 'test' database to test out the logic. Turn on journaling. */
+
+    MongoClient.connect(format("mongodb://%s:%s/test?journal=true", host, port), function(err, db) {
+        if (err) {
+            throw err
+            return
+        }
+
+        var collection = db.collection('fnck')
+
+        for (var i = 0; i < im_array.length; i++) {
+            /* collection.update essentially adds a new key called 'pho' */
+            collection.update(
+                { fn : im_array[i][0] },
+                { $set: {
+                    pho : im_array[i][2]}
+                }, function (err, result) {
+                    if (err) return err
+                })
+
+            /* wait 20 seconds and hope write operations are done */
+            setTimeout(function () {
+                db.close()
+            },20000)
+        }
+
+    })
+
 }
