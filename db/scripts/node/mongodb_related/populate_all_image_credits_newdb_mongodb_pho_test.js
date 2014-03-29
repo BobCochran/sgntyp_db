@@ -4,21 +4,21 @@
  * 2014-03-23                                                            *
  *                                                                       *
  * To start the script, use this command line in a shell window:         *
- * node populate_all_image_credits_newdb_mongodb_test.js startline end   *
+ * node populate_all_image_credits_newdb_mongodb_pho_test.js startline end
  *                                                                       *
  * for example                                                           *
  *                                                                       *
- * node populate_all_image_credits_newdb_mongodb_test.js 1 200           *
+ * node populate_all_image_credits_newdb_mongodb_pho_test.js 1 200       *
  *                                                                       *
  * Tells the script to start processing at line 1 and terminate          *
  * processing at line 200. Depending on your system and available memory,*
- * 200 open file descriptors at one time may be too many, so process     *
- * fewer lines per pass.                                                 *
+ * 200 open file descriptors at one time may be too many to have, so     *
+ * process fewer lines per pass.                                         *
  *                                                                       *
  * The script processes in small passes to account for system overhead in*
  * using up too many file descriptors.                                   *
  * ----------------------------------------------------------------------*
- * 2014-03-23                                                            *
+ * 2014-03-28                                                            *
  * CUSTOMER-SUPPLIED FILE MAY NEED REFORMATTING PRIOR TO USE             *
  * ----------------------------------------------------------------------*
  * Read the converted_New_Names_2014-03-08_FileNamesandCaptionKeys.txt   *
@@ -32,32 +32,58 @@
  * row of the source file and append the extension .txt (period,         *
  * character t, character x, character t) to this name. Then read this   *
  * *.txt file with fs.read. Parse this file and extract the              *
- * "Photographer" and "Photo URL" fields within the file. Next, update   *
- * the document in the 'fnck' collection of the 'sgtypdb2' database      *
- * to add these two new fields to the document: 'photographer' and 'url'.*
- * This will allow one document to be used to populate most of the       *
- * eventual application web page.                                        *
+ * "Photographer" field within the file. Next, update the matching       *
+ * document in the 'fnck' collection of the 'sgtypdb2' database          *
+ * to add this new field to the document: 'photographer'.                *
+ *-----------------------------------------------------------------------*
+ * FOR TESTING PURPOSES, the 'fnck' collection has been copied to the    *
+ * 'test' database using mongodump and then mongorestore.                *
+ *-----------------------------------------------------------------------*
+ * The ultimate reason for updating the fnck collection in this way is to*
+ * allow one document to be used as the source data to populate most of  *
+ * the eventual application web page.                                    *
  *                                                                       *
  *------------------------- S T E P S -----------------------------------*
  *                                                                       *
  * 1. Extract filename from the current input line of the                *
  *    'converted_New_Names_2014-03-08_FileNamesandCaptionKeys.txt' file. *
  *    Example: _8758450914_o                                             *
- * 2. Append a '.txt' extension to the extracted filename.               *
+ * 2. Save this filename prefix to a multidimensional array.             *
+ * 3. Append a '.txt' extension to the extracted filename.               *
  *    _8758450914_o.txt                                                  *
- * 3. Attempt to open a file matching that string.                       *
+ * 4. Save the [filename].txt element to the same multimensional array as*
+ *    in step 2. The array element now looks like                        *
+ *    [["_8758450914_o", "_8758450914_o.txt",...]]                       *
+ * 5. Iterate to the next line of the FilenamesandCaptionKeys input file *
+ *    listed in Step 1. Repeat steps 1-4, building up the multi-         *
+ *    dimensional array with the elements for the next line of the input *
+ *    file. So element #1 will look like this:                           *
+ *    [["_8758450914_o", "_8758450914_o.txt",...],                       *
+ *     ["_9758450914_o", "_9758450914_o.txt",...]...]                    *
+ *    Do this in passes of 25 to 200 files.                              *
+ *                                                                       *
+ * 6. Now, working from the very beginning of the multidimensional array *
+ *    that we have built, attempt to open a file matching the            *
+ *    Filename.txt string that is at that index in our array. Example:   *
  *    open '_8758450914_o.txt'                                           *
- * 4. Attempt to read the file if the open succeeds.                     *
+ * 7. Attempt to read the file if the open succeeds.                     *
  *    read '_8758450914_o.txt'                                           *
- * 5. Find the line that begins with the word "Photographer : "          *
- * 6. Extract the name of the photographer.                              *
+ * 8. Find the line that begins with the word "Photographer : "          *
+ * 9. Extract the name of the photographer.                              *
  *    peter.clark                                                        *
- * 7. Find the line that begins with "Photo URL : "                      *
- * 8. Extract the url provided.                                          *
- *    http://www.flickr.com/photos/clarkzip/8758450914/                  *
- * 9. This script will attempt to update each matching document within   *
- *    the 'fnck' collection of the 'sgntypdb' database with the          *
- *    photographer and url information just extracted from the text file.*
+ *10. Add the photographer name to the multidimensional array as in step *
+ *    4. The array now looks like:                                       *
+ *    [["_8758450914_o", "_8758450914_o.txt", "peter.clark"],            *
+ *    ["_9758450914_o", "_9758450914_o.txt",...]...]                     *
+ *11. Iterate through all the array elements that need the photographer  *
+ *    name added to the associated filename.txt string.                  *
+ *12. With 25 to 200 filenames ready in the array, open a MongoDB        *
+ *    connection to the 'fnck' collection of either the 'test' or        *
+ *    the 'sgtypdb2' databases. At first use the 'test' database when    *
+ *    testing application logic.                                         *
+ *13. This script will attempt to update each matching document within   *
+ *    the 'fnck' collection of the 'sgtypdb2' database with the          *
+ *    photographer information just extracted from the text files.       *
  *    It expects that these fields will be added to each matching        *
  *    document and that these fields will be new fields for each matching*
  *    document. That is, the script does not try to try to update these  *
@@ -116,7 +142,7 @@ get_credits()
  * the summary web page. We want to pass it the starting line number value.
  */
 setTimeout(function () {
-    build_summary_web_page(startLn)
+//    build_summary_web_page(startLn)
 },46000)
 
 function readLines(input, func) {
@@ -252,35 +278,7 @@ function get_photo_info(fname) {
 
     })
 }
-/***************************************************************************
- * This function will create a writeable stream as output, and build a web *
- * page on the fly with the contents of the arrays fn_array, pho_array and *
- * url_array as the input to the function. Each item in these arrays will  *
- * be formatted as one row of a web page table. This way the project       *
- * can have the name of the image file, the photographer, and a clickable  *
- * link to that image all on one web page.                                 *
- **************************************************************************/
-function build_summary_web_page(wr) {
 
-    debugger
-    var wr1 = parseInt(wr, 10)
-    var stream2 = fs.createWriteStream(__dirname + '/photographer_table' + webPageNumb + '.html')
-
-    stream2.write("<!DOCTYPE html><html lang=\"EN\"><head><meta charset=\"utf-8\" />" +
-        "<title>Table of Image Names, Photograhers, and Links</title><link rel=\"stylesheet\" href=\"sgntyp_table.css\" /></head><body>")
-    stream2.write("<h1>Table of Image File Names, Photographers, and Links</h1><h2>Page 1 of 7</h2><p>Links will open a new browser window or browser tab, depending on your browser settings.</p>")
-    stream2.write("<table><thead><tr><th scope=\"col\">Row Number</th><th scope=\"col\">Image name without extension</th><th scope=\"col\">Photographer Name</th>" +
-        "<th scope=\"col\">Photo Located At</th></tr></thead><tbody>")
-    for (var k = 0; k < im_array.length; k++) {
-
-        stream2.write("<tr><td>" + wr1 + "</td><td>" + im_array[k] + "</td><td>" + pho_array[k] + "</td><td>" + "<a href=\"" + url_array[k] + "\"" + " target=\"_blank\">" + url_array[k] + "</a></td></tr>")
-        wr1++
-    }
-    stream2.end("</tbody></table><p>Programming proudly done by Bob Cochran r2cochran2 at gmail dot com</p></body></html>")
-    stream2.on("finish", function() {
-        console.log('\nNumber of bytes written ' + stream2.bytesWritten)
-    })
-}
 function func(data) {
   console.log('Line: ' + totalLines + ' ' + data);
  
