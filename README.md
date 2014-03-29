@@ -7,12 +7,12 @@ with the Signtyp Imaging Project.
 The project also contains optional scripts written in node.js which can populate the 
 database tables.
 
-# NoSQL Database Support
+# MongoDB Database Support
 
 After experimentation, MongoDB is being used to provide all database support
 for this project. A database named "sgtypdb2" exists and associated collections 
 are being progressively created and tested as time goes on. MongoDB version 2.4.9 and Node.js 
-version 0.10.26 is being used. A nonrelational database approach seems to speed
+version 0.10.26 is being used. A nonrelational database choice greatly speeds
 development time for the database. Scripts which successfully populate a collection are 
 added to the db/scripts/node/mongodb_related directory. A given collection may be updated 
 by more than one script. This is especially true of the 'fnck' collection. 
@@ -46,11 +46,13 @@ populating the database tables with data.
 The officially supported database name will be  'sgtypdb2'. Some scripts may be writing to
 the 'test' database, since the developer maintains this for testing program logic.
 
+The database itself is expected to be quite small, about 8 Gb.
+
 The collections associated with the database are:
 
-congrp
-fnck
-captioneng
+ congrp
+ fnck
+ captioneng
 
 14 additional collections are being planned.
 
