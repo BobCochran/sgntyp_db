@@ -234,7 +234,7 @@ function get_credits() {
         process.stdout.write('\nProcessing files...\n')
         for(var pj = 0; pj < im_array.length; pj++) {
             process.stdout.write(im_array[pj][0] + '... ')
-            get_photo_info(im_array[pj][0],pj)
+            get_photo_info(im_array[pj][1],pj)
             process.stdout.write('done!\n')
         }
     }, 35000)
