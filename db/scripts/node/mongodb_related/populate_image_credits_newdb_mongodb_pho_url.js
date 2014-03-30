@@ -1,14 +1,14 @@
 /*************************************************************************
  * NODE.JS SCRIPT TO POPULATE A MONGODB 'fnck' collection from a tab-    *
  * separated text file supplied by the customer.                         *
- * 2014-03-23                                                            *
+ * 2014-03-30                                                            *
  *                                                                       *
  * To start the script, use this command line in a shell window:         *
- * node populate_all_image_credits_newdb_mongodb_pho_test.js startline end
+ * node populate_image_credits_newdb_mongodb_pho_url.js startline endline*
  *                                                                       *
  * for example                                                           *
  *                                                                       *
- * node populate_all_image_credits_newdb_mongodb_pho_test.js 1 240       *
+ * node populate_image_credits_newdb_mongodb_pho_url.js 1 240            *
  *                                                                       *
  * Tells the script to start processing at line 1 and terminate          *
  * processing at line 240. Depending on your system and available memory,*
@@ -32,17 +32,19 @@
  * row of the source file and append the extension .txt (period,         *
  * character t, character x, character t) to this name. Then read this   *
  * *.txt file with fs.read. Parse this file and extract the              *
- * "Photographer" field within the file. Next, update the matching       *
+ * "Photo URL" field within the file. Next, update the matching          *
  * document in the 'fnck' collection of the 'sgtypdb2' database          *
- * to add this new field to the document: 'photographer'.                *
+ * to add this new field to the document: 'phourl'.                      *
  *-----------------------------------------------------------------------*
  * FOR TESTING PURPOSES, the 'fnck' collection has been copied to the    *
  * 'test' database using mongodump and then mongorestore.                *
  *-----------------------------------------------------------------------*
  * The ultimate reason for updating the fnck collection in this way is to*
- * allow one document to be used as the source data to populate most of  *
- * the eventual application web page.                                    *
- *                                                                       *
+ * allow 1-4 documents to be used as the source data to populate most of *
+ * each eventual application web page. Each document queried from fnck   *
+ * matches a particular image that will appear on the web page. There    *
+ * will be 4 images on each web page. See the front-end project          *
+ * repository for details.                                               *
  *------------------------- S T E P S -----------------------------------*
  *                                                                       *
  * 1. Extract filename from the current input line of the                *
@@ -60,7 +62,7 @@
  *    file. So element #1 will look like this:                           *
  *    [["_8758450914_o", "_8758450914_o.txt",...],                       *
  *     ["_9758450914_o", "_9758450914_o.txt",...]...]                    *
- *    Do this in passes of 25 to 200 files.                              *
+ *    Do this in passes of 25 to 240 files.                              *
  *                                                                       *
  * 6. Now, working from the very beginning of the multidimensional array *
  *    that we have built, attempt to open a file matching the            *
@@ -68,26 +70,25 @@
  *    open '_8758450914_o.txt'                                           *
  * 7. Attempt to read the file if the open succeeds.                     *
  *    read '_8758450914_o.txt'                                           *
- * 8. Find the line that begins with the word "Photographer : "          *
- * 9. Extract the name of the photographer.                              *
- *    peter.clark                                                        *
- *10. Add the photographer name to the multidimensional array as in step *
- *    4. The array now looks like:                                       *
- *    [["_8758450914_o", "_8758450914_o.txt", "peter.clark"],            *
+ * 8. Find the line that begins with the words "Photo URL : "            *
+ * 9. Extract the photo URL.                                             *
+ *    http://www.flickr.com/myphoto                                      *
+ *10. Add the URL to the multidimensional array as in step 4. The array  *
+ *    now looks like:                                                    *
+ *[["_8758450914_o", "_8758450914_o.txt", "http://www.flickr.com/myphoto"],
  *    ["_9758450914_o", "_9758450914_o.txt",...]...]                     *
- *11. Iterate through all the array elements that need the photographer  *
- *    name added to the associated filename.txt string.                  *
- *12. With 25 to 200 filenames ready in the array, open a MongoDB        *
+ *11. Iterate through all the array elements that need the photo URL     *
+ *    added to the associated filename.txt string.                       *
+ *12. With 25 to 240 filenames ready in the array, open a MongoDB        *
  *    connection to the 'fnck' collection of either the 'test' or        *
  *    the 'sgtypdb2' databases. At first use the 'test' database when    *
  *    testing application logic.                                         *
  *13. This script will attempt to update each matching document within   *
  *    the 'fnck' collection of the 'sgtypdb2' database with the          *
- *    photographer information just extracted from the text files.       *
- *    It expects that these fields will be added to each matching        *
- *    document and that these fields will be new fields for each matching*
- *    document. That is, the script does not try to try to update these  *
- *    fields in the matching document because they do not exist yet.     *
+ *    URL information just extracted from the text files.                *
+ *    If the URL field is new, it will be added to the matching          *
+ *    document. The script will otherwise update the URL if the field is *
+ *    already present on the matched document.                           *
  *-----------------------------------------------------------------------*
  * Target database engine: MONGODB 2.4.9                                 *
  * Required node.js module: mongodb                                      *
@@ -230,7 +231,7 @@ function readLines(input, func) {
  *
  * For each file name in the array[j1][j2], we want to call a function that will
  * create a readstream of that file's contents, and parse out the
- * photographer's name. The photographer name would be put into im_array[j1][2].
+ * photo URL. The photo URL would be put into im_array[j1][2].
  *
  * After all the file names are processed, we can update the 'fnck' collection documents with
  * corresponding photographer information.
@@ -278,22 +279,17 @@ function get_photo_info(fname,idx) {
     stream.on("data", function(data1) {
         var chunk
         var phline
-        var photog
-        var name_end
-//        var the_url
-//        var url_end
+        var the_url
+        var url_end
 
         chunk += data1
-        phline = chunk.indexOf('Photographer : ')
+        phline = chunk.indexOf('Photo URL    : ')
         if (phline > -1) {
-//            name_end = chunk.indexOf('\n',phline)
-            // try to get rid of the carriage return stuff
-            name_end = chunk.indexOf('\r',phline)
-            photog = chunk.slice(phline+15,name_end)
-            im_array[idx][2] = photog
-
+            url_end = chunk.indexOf('\r',phline)
+            the_url = chunk.slice(phline+15,url_end)
+            im_array[idx][2] = the_url
         } else {
-            process.stdout.write('Photographer not found')
+            console.log('Photo URL not found')
         }
 
 
@@ -305,7 +301,7 @@ function func(data) {
  
 }
 function do_array_print() {
-    console.log('Image name\tFilename\t\tPhotographer name\n')
+    console.log('Image name\tFilename\t\tPhoto URL\n')
     for (var i = 0; i < im_array.length; i++) {
         console.log(im_array[i][0] + '\t' + im_array[i][1] + '\t\t' + im_array[i][2])
     }
@@ -332,11 +328,11 @@ function do_db_updates() {
         var collection = db.collection('fnck')
 
         for (var i = 0; i < im_array.length; i++) {
-            /* collection.update essentially adds a new key called 'pho' */
+            /* collection.update essentially adds a new key called 'phourl' */
             collection.update(
                 { fn : im_array[i][0] },
                 { $set: {
-                    pho : im_array[i][2]}
+                    phourl : im_array[i][2]}
                 }, function (err, result) {
                     if (err) return err
                 })
