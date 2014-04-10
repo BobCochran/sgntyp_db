@@ -7,7 +7,7 @@
  *                                                                       *
  * for example                                                           *
  *                                                                       *
- * node populate_image_credits_newdb_mongodb_pho_url.js 1 240            *
+ * node populate_images_newdb_mongodb_test.js 1 240                      *
  *                                                                       *
  * Tells the script to start processing at line 1 and terminate          *
  * processing at line 240. Depending on your system and available memory,*
@@ -17,8 +17,7 @@
  * The script processes in small passes to account for system overhead in*
  * using up too many file descriptors.                                   *
  * ----------------------------------------------------------------------*
- * 2014-03-30                                                            *
- * CUSTOMER-SUPPLIED FILE MAY NEED REFORMATTING PRIOR TO USE             *
+ * 2014-04-10                                                            *
  * ----------------------------------------------------------------------*
  * Read the converted_New_Names_2014-03-08_FileNamesandCaptionKeys.txt   *
  * file as a readable stream.                                            *
@@ -28,68 +27,54 @@
  * separated lines in the format '\t\t\t\t\n' appended to the end of the *
  * original source input file were removed.                              *
  * The goal in this script is to extract the filename contained in each  *
- * row of the source file and append the extension .txt (period,         *
- * character t, character x, character t) to this name. Then read this   *
- * *.txt file with fs.read. Parse this file and extract the              *
- * "Photo URL" field within the file. Next, update the matching          *
- * document in the 'fnck' collection of the 'sgtypdb2' database          *
- * to add this new field to the document: 'phourl'.                      *
+ * row of the source file and append the extension .jpg (period,         *
+ * character j, character p, character g) to this name.                  *
+ *                                                                       *
+ * Then read this *.jpg file with fs.read.                               *
+ *                                                                       *
+ * Next, add or update this document to the collection 'stimages' of the *
+ * 'sgtypdb2' database.                                                  *
  *-----------------------------------------------------------------------*
- * FOR TESTING PURPOSES, the 'fnck' collection has been copied to the    *
+ * FOR TESTING PURPOSES, the 'stimages' collection has been copied to the*
  * 'test' database using mongodump and then mongorestore.                *
- *-----------------------------------------------------------------------*
- * The ultimate reason for updating the fnck collection in this way is to*
- * allow 1-4 documents to be used as the source data to populate most of *
- * each eventual application web page. Each document queried from fnck   *
- * matches a particular image that will appear on the web page. There    *
- * will be 4 images on each web page. See the front-end project          *
- * repository for details.                                               *
  *------------------------- S T E P S -----------------------------------*
  *                                                                       *
  * 1. Extract filename from the current input line of the                *
  *    'converted_New_Names_2014-03-08_FileNamesandCaptionKeys.txt' file. *
  *    Example: _8758450914_o                                             *
  * 2. Save this filename prefix to a multidimensional array.             *
- * 3. Append a '.txt' extension to the extracted filename.               *
- *    _8758450914_o.txt                                                  *
- * 4. Save the [filename].txt element to the same multimensional array as*
+ * 3. Append a '.jpg' extension to the extracted filename.               *
+ *    _8758450914_o.jpg                                                  *
+ * 4. Save the [filename].jpg element to the same multimensional array as*
  *    in step 2. The array element now looks like                        *
- *    [["_8758450914_o", "_8758450914_o.txt",...]]                       *
+ *    [["_8758450914_o", "_8758450914_o.jpg",...]]                       *
  * 5. Iterate to the next line of the FilenamesandCaptionKeys input file *
  *    listed in Step 1. Repeat steps 1-4, building up the multi-         *
  *    dimensional array with the elements for the next line of the input *
  *    file. So element #1 will look like this:                           *
- *    [["_8758450914_o", "_8758450914_o.txt",...],                       *
- *     ["_9758450914_o", "_9758450914_o.txt",...]...]                    *
+ *    [["_8758450914_o", "_8758450914_o.jpg",...],                       *
+ *     ["_9758450914_o", "_9758450914_o.jpg",...]...]                    *
  *    Do this in passes of 25 to 240 files.                              *
  *                                                                       *
  * 6. Now, working from the very beginning of the multidimensional array *
  *    that we have built, attempt to open a file matching the            *
- *    Filename.txt string that is at that index in our array. Example:   *
- *    open '_8758450914_o.txt'                                           *
+ *    Filename.jpg string that is at that index in our array. Example:   *
+ *    open '_8758450914_o.jpg'. This is a binary file and probably must  *
+ *    be opened in base64 encoding.                                      *
  * 7. Attempt to read the file if the open succeeds.                     *
- *    read '_8758450914_o.txt'                                           *
- * 8. Find the line that begins with the words "Photo URL : "            *
- * 9. Extract the photo URL.                                             *
- *    http://www.flickr.com/myphoto                                      *
- *10. Add the URL to the multidimensional array as in step 4. The array  *
- *    now looks like:                                                    *
- *[["_8758450914_o", "_8758450914_o.txt", "http://www.flickr.com/myphoto"],
- *    ["_9758450914_o", "_9758450914_o.txt",...]...]                     *
- *11. Iterate through all the array elements that need the photo URL     *
- *    added to the associated filename.txt string.                       *
- *12. With 25 to 240 filenames ready in the array, open a MongoDB        *
- *    connection to the 'fnck' collection of either the 'test' or        *
+ *    read '_8758450914_o.jpg'                                           *
+ * 8. Save the jpg file and the file name to a MongoDB collection named  *
+ *    'stimages'.                                                        *
+ *                                                                       *
+ * 9. With 25 to 240 images ready in the array, open a MongoDB           *
+ *    connection to the 'stimages' collection of either the 'test' or    *
  *    the 'sgtypdb2' databases. At first use the 'test' database when    *
  *    testing application logic.                                         *
- *13. This script will attempt to update each matching document within   *
- *    the 'fnck' collection of the 'sgtypdb2' database with the          *
- *    URL information just extracted from the text files.                *
- *    If the URL field is new, it will be added to the matching          *
- *    document. The script will otherwise update the URL if the field is *
- *    already present on the matched document.                           *
+ *10. This script will attempt to update each matching document within   *
+ *    the 'stimages' collection of the 'sgtypdb2' database with the      *
+ *    images just extracted from the jpg files.                          *
  *-----------------------------------------------------------------------*
- * Target database engine: MONGODB 2.4.9                                 *
+ * Target database engine: MONGODB 2.4.10 and should work on MONGODB 2.6 *
  * Required node.js module: mongodb                                      *
  * It can take time for this script to complete all the inserts for the  *
  * fnck collection. If you abort the script by pressing CTRL-D or        *
@@ -324,7 +309,7 @@ function do_db_updates() {
             return
         }
 
-        var collection = db.collection('fnck')
+        var collection = db.collection('stimages')
 
         for (var i = 0; i < im_array.length; i++) {
             /* collection.update essentially adds a new key called 'phourl' */
