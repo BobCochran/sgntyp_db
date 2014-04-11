@@ -90,6 +90,7 @@ var endLn = 0           // the ending line for this processing "pass"
 var actLines = 0        // the actual number of text lines that readLines has found
 var webRows = 0         // count of web page row numbers, starting from 1
 var array_lines = 0     // the number of array iterations we need
+var the_image           // content of image read by fs.ReadStream
 
 var MongoClient = require('mongodb').MongoClient
     , format = require('util').format;
@@ -189,7 +190,7 @@ function readLines(input, func) {
           debugger
           im_array[j1][j2] = fn1              // save the filename string without an extension
 
-          fn1 = fn1 + '.txt'                      // append the .txt extension
+          fn1 = fn1 + '.jpg'                      // append the .jpg extension
           j2++                                    // bump to next element in j1
           im_array[j1][j2] = fn1                  // push this onto the array
           j2 = 0                                  // reset j2
@@ -211,14 +212,13 @@ function readLines(input, func) {
  * At this point, we have extracted all the filenames from the source TSV document and these
  * are waiting for us in the array im_array. The array now looks like this:
  *
- * [["_8758450914_o", "_8758450914_o.txt", ...],["_9758450914_o", "_9758450914_o.txt",...]...]
+ * [["_8758450914_o", "_8758450914_o.jpg", ...],["_9758450914_o", "_9758450914_o.jpg",...]...]
  *
  * For each file name in the array[j1][j2], we want to call a function that will
- * create a readstream of that file's contents, and parse out the
- * photo URL. The photo URL would be put into im_array[j1][2].
+ * create a readstream of that images's contents. The image will be put into im_array[j1][2].
  *
- * After all the file names are processed, we can update the 'fnck' collection documents with
- * corresponding photographer information.
+ * After all the file names are processed, we can update the 'stimages' collection documents with
+ * corresponding images.
  *
  */
 function get_credits() {
@@ -227,6 +227,7 @@ function get_credits() {
         process.stdout.write('\nProcessing files...\n')
         for(var pj = 0; pj < im_array.length; pj++) {
             process.stdout.write(im_array[pj][0] + '... ')
+            the_image = null
             get_photo_info(im_array[pj][1],pj)
             process.stdout.write('done!\n')
         }
@@ -241,7 +242,8 @@ function get_credits() {
  */
 function get_photo_info(fname,idx) {
 
-    stream = fs.createReadStream('/Volumes/pictures/Signtyp/promptsnormalizedOnefolder/' + fname)
+    stream = fs.createReadStream('/Volumes/pictures/Signtyp/promptsnormalizedOnefolder/' + fname, { encoding: 'base64' })
+
     stream.on("error", function(err) {
 
         return console.error("open file error " + err.message)
@@ -255,28 +257,24 @@ function get_photo_info(fname,idx) {
 
             } else {
                 size = stats.size
+                if (size > 12582912) {
+                    return console.error("File too large for one MongoDB document: " + fname + " " + size)
+                }
 
 
             }
         })
     })
     stream.on("data", function(data1) {
-        var chunk
-        var phline
-        var the_url
-        var url_end
 
-        chunk += data1
-        phline = chunk.indexOf('Photo URL    : ')
-        if (phline > -1) {
-            url_end = chunk.indexOf('\r',phline)
-            the_url = chunk.slice(phline+15,url_end)
-            im_array[idx][2] = the_url
-        } else {
-            console.log('Photo URL not found')
-        }
+        the_image += data1
 
 
+    })
+
+    stream.on("end", function() {
+
+        im_array[idx][2] = the_image
     })
 }
 
@@ -285,17 +283,16 @@ function func(data) {
  
 }
 function do_array_print() {
-    console.log('Image name\tFilename\t\tPhoto URL\n')
+    console.log('Image name\tFilename\n')
     for (var i = 0; i < im_array.length; i++) {
-        console.log(im_array[i][0] + '\t' + im_array[i][1] + '\t\t' + im_array[i][2])
+        console.log(im_array[i][0] + '\t' + im_array[i][1])
     }
 }
 function do_db_updates() {
-    /* At this point, we now have an array all ready to update the collection 'fnck' in the
-     * test or production database. We will use db.fnck.update() to add a new key to the fnck
-     * collection named 'pho'. For each document, this key will have the value of the individual
-     * photographer's name.
-     *
+    /* At this point, we now have an array all ready to insert the collection 'stimages' in the
+     * test or production database. We will use db.stimages.insert() to add a new document to the stimages
+     * collection. For each document, there will be a key "fn" with the value of the image filename
+     * and another key "image" containing the base64 image.
      */
 
     console.log("\nUpdating database collection.");
@@ -312,14 +309,19 @@ function do_db_updates() {
         var collection = db.collection('stimages')
 
         for (var i = 0; i < im_array.length; i++) {
-            /* collection.update essentially adds a new key called 'phourl' */
-            collection.update(
-                { fn : im_array[i][0] },
-                { $set: {
-                    phourl : im_array[i][2]}
-                }, function (err, result) {
-                    if (err) return err
-                })
+            /* collection.insert  */
+            var img1 = new MongoDB.Binary(im_array[i][2])
+
+            collection.insert([{ "fn" : im_array[i][0],
+                "image" : img1
+                }], function(err, result) {
+                if (err && err.name === "MongoError" && err.code === 11000) {
+                    return
+                } else if (err) {
+                    throw err
+                }
+
+            })
 
             /* wait 20 seconds and hope write operations are done */
             setTimeout(function () {
