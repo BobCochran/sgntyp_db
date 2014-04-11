@@ -141,13 +141,15 @@ var input = fs.createReadStream('/Users/bobc/Documents/sgntyp_renamed_files_2014
 readLines(input, func);
 get_credits()
 /*
- * Wait 46 seconds to let other processes complete, then build
- * the summary web page. We want to pass it the starting line number value.
+ * Wait 20 seconds to let other processes complete, then print some basic file
+ * information to the console.
+ * Then perform the database updates.
+ *
  */
 setTimeout(function () {
     do_array_print()
     do_db_updates()
-},46000)
+},20000)
 
 
 function readLines(input, func) {
@@ -236,7 +238,7 @@ function get_credits() {
 
 }
 /*
- This function accepts an input file name in the format filename.txt from function
+ This function accepts an input file name in the format filename.jpg from function
  get_credits() and attempts to create a readstream of the file. Then it attempts to
  parse out the photographer's name and save that to im_array[pj][2].
  */
