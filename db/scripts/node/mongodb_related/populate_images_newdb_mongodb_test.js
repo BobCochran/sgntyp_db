@@ -95,6 +95,8 @@ var the_image           // content of image read by fs.ReadStream
 var MongoClient = require('mongodb').MongoClient
     , format = require('util').format;
 
+var MongoBin = require('mongodb').Binary;
+
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : 27017;
 
@@ -312,7 +314,7 @@ function do_db_updates() {
 
         for (var i = 0; i < im_array.length; i++) {
             /* collection.insert  */
-            var img1 = new MongoDB.Binary(im_array[i][2])
+            var img1 = new MongoBin(im_array[i][2])
 
             collection.insert([{ "fn" : im_array[i][0],
                 "image" : img1
