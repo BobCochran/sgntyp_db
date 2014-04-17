@@ -272,6 +272,7 @@ function get_photo_info(fname,idx) {
     stream.on("data", function(data1) {
 
         the_image += data1
+        console.log("Got %d bytes of data ", data1.length)
 
 
     })
@@ -299,40 +300,44 @@ function do_db_updates() {
      * and another key "image" containing the base64 image.
      */
 
-    console.log("\nUpdating database collection.");
-    console.log("\nConnecting to database server on " + host + ":" + port +"\n");
+    /* wait 35 seconds and hope read operations are done */
+    setTimeout(function () {
+        console.log("\nUpdating database collection.");
+        console.log("\nConnecting to database server on " + host + ":" + port +"\n");
+        /* Connect to the 'test' database to test out the logic. Turn on journaling. */
 
-    /* Connect to the 'test' database to test out the logic. Turn on journaling. */
+        MongoClient.connect(format("mongodb://%s:%s/test?journal=true", host, port), function(err, db) {
+            if (err) {
+                throw err
+                return
+            }
 
-    MongoClient.connect(format("mongodb://%s:%s/test?journal=true", host, port), function(err, db) {
-        if (err) {
-            throw err
-            return
-        }
+            var collection = db.collection('stimages')
 
-        var collection = db.collection('stimages')
+            for (var i = 0; i < im_array.length; i++) {
+                /* collection.insert  */
+                var img1 = new MongoBin(im_array[i][2])
 
-        for (var i = 0; i < im_array.length; i++) {
-            /* collection.insert  */
-            var img1 = new MongoBin(im_array[i][2])
 
-            collection.insert([{ "fn" : im_array[i][0],
-                "image" : img1
-                }], function(err, result) {
-                if (err && err.name === "MongoError" && err.code === 11000) {
-                    return
-                } else if (err) {
-                    throw err
-                }
+                collection.insert([
+                    { "fn": im_array[i][0],
+                        "image": img1
+                    }
+                ], { w: 1 }, function (err, result) {
+                    if (err && err.name === "MongoError" && err.code === 11000) {
+                        console.log(err)
+                        return
+                    } else if (err) {
+                        throw err
+                    }
+                })
+                /* wait 30 seconds and hope write operations are done */
+                setTimeout(function () {
+                    db.close()
+                },30000)
 
-            })
+            }
+        })
+    },35000)
 
-            /* wait 20 seconds and hope write operations are done */
-            setTimeout(function () {
-                db.close()
-            },20000)
-        }
-
-    })
-
-}
+   }
